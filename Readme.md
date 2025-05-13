@@ -3,54 +3,76 @@
 Este repositório contém um pipeline de dados desenvolvido com Apache Airflow e PySpark, estruturado com base nas camadas **Bronze**, **Silver** e **Gold** de um modelo Lakehouse.
 
 ## 📁 Estrutura do Projeto
-
-dags/
-├── json_to_bronze.py # DAG responsável por transformar arquivos JSON em Parquet (camada Bronze)
-├── data_to_silver.py # DAG que remove prefixos das colunas e gera a camada Silver
-├── processar_gold.py # DAG que gera os dados agregados para a camada Gold
-├── pipeline_lakehouse.py # DAG principal que orquestra todas as etapas do pipeline
+<pre>
+.
+├── dados/                         # Camadas de dados no formato Data Lakehouse
+│   ├── landing/                   # Dados brutos recebidos (JSON)
+│   │   ├── customers.json
+│   │   ├── order_item.json
+│   │   └── orders.json
+│   ├── bronze/                    # Dados brutos convertidos para Parquet
+│   │   ├── customers_bronze.parquet/
+│   │   ├── order_items_bronze.parquet/
+│   │   └── orders_bronze.parquet/
+│   ├── silver/                    # Dados limpos e estruturados
+│   │   ├── customers_silver.parquet/
+│   │   ├── order_items_silver.parquet/
+│   │   └── orders_silver.parquet/
+│   └── gold/                      # Dados prontos para análise e dashboards
+│       └── pedidos_por_cidade_estado/
+├── dags/                          # Pipelines do Airflow
+│   ├── pipeline_lakehouse.py      # Pipeline principal
+│   └── __pycache__/               # Arquivos compilados do Python (gerados automaticamente)
+├── scripts/                       # Scripts de transformação por camada
+│   ├── __init__.py
+│   ├── bronze/
+│   │   ├── customers_bronze.py
+│   │   ├── order_items_bronze.py
+│   │   └── orders_bronze.py
+│   ├── silver/
+│   │   ├── customers_silver.py
+│   │   ├── order_items_silver.py
+│   │   └── orders_silver.py
+│   └── gold/
+│       └── processar_gold.py
+</pre>
 
 ## 🗂️ Estrutura do Pipeline
 
-├── landing/                  # Dados brutos recebidos em formato JSON
-│ └── arquivos_json/          # Subpastas com arquivos JSON por entidade
-│     ├── customers/
-│     ├── orders/
-│     └── order_item/
-│
-├── bronze/                  # Dados convertidos de JSON para Parquet
-│   ├── customers/
-│   ├── orders/
-│   └── order_item/
-│
-├── silver/                  # Dados tratados e limpos
-│   ├── customers/
-│   ├── orders/
-│   └── order_item/
-│
-└── gold/                    # Dados prontos para consumo analítico
-    └── pedidos_por_cidade_estado/
-
+<pre>
+pipeline_lakehouse
+├── bronze_customers
+│     └── silver_customers
+│           └──
+├── bronze_orders
+│     └── silver_orders
+│           └──
+├── bronze_order_items
+│     └── silver_order_items
+│           └──
+└──────────── gold
+</pre>
 
 ## 🔄 Pipeline de Orquestração (`pipeline_lakehouse.py`)
 
 A DAG principal `pipeline_lakehouse` executa as três etapas principais do fluxo:
 
-1. **Camada Landing → Bronze (`json_to_bronze_task`)**:  
+1. **Camada Landing → Bronze (`bronze_customers`, `bronze_orders`, `bronze_order_items`)**:  
    - Lê arquivos JSON da camada *Landing*.
    - Converte para formato Parquet.
    - Salva os dados tratados na camada *Bronze*.
 
-2. **Camada Bronze → Silver (`data_to_silver_task`)**:  
+2. **Camada Bronze → Silver (`silver_customers`, `silver_orders`, `silver_order_items`)**:  
    - Lê os dados em Parquet da camada Bronze.
    - Remove prefixos das colunas e realiza transformações.
    - Salva os dados tratados na camada *Silver*.
 
-3. **Camada Silver → Gold (`processar_gold_task`)**:  
+3. **Camada Silver → Gold (`gold`)**:  
    - Realiza junções e agregações nos dados da Silver.
    - Salva os resultados analíticos na camada *Gold*.
 
 > As tarefas de Bronze e Silver são executadas **em paralelo**, e a camada Gold só é processada após ambas serem concluídas.
+
 
 ## ▶️ Execução
 
@@ -58,13 +80,21 @@ A DAG principal `pipeline_lakehouse` executa as três etapas principais do fluxo
 
 - Apache Airflow instalado e configurado.
 - PySpark disponível no ambiente.
-- Estrutura de diretórios criada:
+- Estrutura de diretórios esperada:
+O projeto assume a seguinte estrutura de pastas dentro do diretório base (resolvido dinamicamente no código):
 
-/home/bru_silveira/airflow/lakehouse/
+<pre>
+dados/
 ├── landing/
 ├── bronze/
 ├── silver/
 └── gold/
+</pre>
+
+⚙️ O caminho base é detectado dinamicamente no código com:
+```
+base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+```
 
 ### Ativando o Airflow
 
@@ -79,17 +109,11 @@ Acesse a interface: http://localhost:8080
 
 ### Visualizando o Pipeline
 
-Na UI do Airflow, você verá as DAGs:
-
-- json_to_bronze
-
-- data_to_silver
-
-- processar_gold
+Na UI do Airflow, você verá a DAG:
 
 - pipeline_lakehouse ✅ (orquestradora principal)
 
-Você pode ativar e rodar qualquer uma separadamente, ou a pipeline_lakehouse para executar o pipeline completo.
+Você pode ativar e rodar a pipeline_lakehouse para executar o pipeline completo.
 
 ### 👩‍💻 Autoria
 Desenvolvido por Bruna Silveira
