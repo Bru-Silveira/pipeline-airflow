@@ -3,38 +3,39 @@
 Este repositório contém um pipeline de dados desenvolvido com Apache Airflow e PySpark, estruturado com base nas camadas **Bronze**, **Silver** e **Gold** de um modelo Lakehouse.
 
 ## 📁 Estrutura do Projeto
+
 <pre>
 .
-├── dados/                         # Camadas de dados no formato Data Lakehouse
-│   ├── landing/                   # Dados brutos recebidos (JSON)
-│   │   ├── customers.json
-│   │   ├── order_item.json
-│   │   └── orders.json
-│   ├── bronze/                    # Dados brutos convertidos para Parquet
-│   │   ├── customers_bronze.parquet/
-│   │   ├── order_items_bronze.parquet/
-│   │   └── orders_bronze.parquet/
-│   ├── silver/                    # Dados limpos e estruturados
-│   │   ├── customers_silver.parquet/
-│   │   ├── order_items_silver.parquet/
-│   │   └── orders_silver.parquet/
-│   └── gold/                      # Dados prontos para análise e dashboards
-│       └── pedidos_por_cidade_estado/
-├── dags/                          # Pipelines do Airflow
-│   ├── pipeline_lakehouse.py      # Pipeline principal
-│   └── __pycache__/               # Arquivos compilados do Python (gerados automaticamente)
-├── scripts/                       # Scripts de transformação por camada
-│   ├── __init__.py
-│   ├── bronze/
-│   │   ├── customers_bronze.py
-│   │   ├── order_items_bronze.py
-│   │   └── orders_bronze.py
-│   ├── silver/
-│   │   ├── customers_silver.py
-│   │   ├── order_items_silver.py
-│   │   └── orders_silver.py
-│   └── gold/
-│       └── processar_gold.py
+├── dags
+│   ├── dados                      # Camadas de dados no formato Data Lakehouse
+│   │   ├── landing                # Dados brutos recebidos (JSON)
+│   │   │   ├── customers.json
+│   │   │   ├── order_item.json
+│   │   │   └── orders.json
+│   │   ├── bronze                 # Dados brutos convertidos para Parquet
+│   │   │   ├── customers_bronze.parquet/
+│   │   │   ├── order_items_bronze.parquet/
+│   │   │   └── orders_bronze.parquet/
+│   │   ├── silver                 # Dados limpos e estruturados
+│   │   │   ├── customers_silver.parquet/
+│   │   │   ├── order_items_silver.parquet/
+│   │   │   └── orders_silver.parquet/
+│   │   └── gold                   # Dados prontos para análise e dashboards
+│   │       └── pedidos_por_cidade_estado.parquet/
+│   ├── scripts                    # Scripts de transformação por camada
+│   │   ├── __init__.py
+│   │   ├── bronze
+│   │   │   ├── customers_bronze.py
+│   │   │   ├── order_items_bronze.py
+│   │   │   └── orders_bronze.py
+│   │   ├── silver
+│   │   │   ├── customers_silver.py
+│   │   │   ├── order_items_silver.py
+│   │   │   └── orders_silver.py
+│   │   └── gold
+│   │       └── processar_gold.py
+│   └── pipeline_lakehouse.py     # Pipeline principal do Airflow
+└── requirements.txt
 </pre>
 
 ## 🗂️ Estrutura do Pipeline
@@ -98,14 +99,31 @@ base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 ### Ativando o Airflow
 
+1. Inicialize o Airflow (apenas na primeira vez):
 ```bash
-# Inicialize o Airflow
 airflow db init
+```
+2. (Importante) Configure o Airflow para reconhecer as DAGs deste projeto:
+* Abra o arquivo de configuração do Airflow:
+* No terminal:
+```bash
+nano ~/airflow/airflow.cfg
+```
+* Ou no vs code:
+```bash
+code ~/airflow/airflow.cfg
+```
+* Localize a linha dags_folder e substitua pelo caminho completo até a pasta dags do seu projeto:
+```bash
+dags_folder = /home/bru_silveira/projeto-airflow/dags
+```
+* Salve e feche o arquivo.
+3. Inicie os serviços:
+```bash
 airflow scheduler
 airflow webserver --port 8080
 ```
-
-Acesse a interface: http://localhost:8080
+4. Acesse a interface: http://localhost:8080
 
 ### Visualizando o Pipeline
 
