@@ -38,22 +38,6 @@ Este repositório contém um pipeline de dados desenvolvido com Apache Airflow e
 └── requirements.txt
 </pre>
 
-## 🗂️ Estrutura do Pipeline
-
-<pre>
-pipeline_lakehouse
-├── bronze_customers
-│     └── silver_customers
-│           └──
-├── bronze_orders
-│     └── silver_orders
-│           └──
-├── bronze_order_items
-│     └── silver_order_items
-│           └──
-└──────────── gold
-</pre>
-
 ## 🔄 Pipeline de Orquestração (`pipeline_lakehouse.py`)
 
 A DAG principal `pipeline_lakehouse` executa as três etapas principais do fluxo:
@@ -114,8 +98,15 @@ nano ~/airflow/airflow.cfg
 code ~/airflow/airflow.cfg
 ```
 * Localize a linha dags_folder e substitua pelo caminho completo até a pasta dags do seu projeto:
+  
+<pre>
+# Adicione um comentário à configuração existente `dags_folder` e, em seguida, especifique o caminho para o repositório clonado
+
+# dags_folder = /home/seu_usuario/airflow/dags
+</pre>
+
 ```bash
-dags_folder = /home/bru_silveira/projeto-airflow/dags
+dags_folder = /home/seu/caminho/para/este/repo/projeto-airflow/dags
 ```
 * Salve e feche o arquivo.
 3. Inicie os serviços:
